@@ -11,19 +11,22 @@ The calculator takes a CSV file containing multi-dimensional data points and ide
 ## Usage
 
 ```bash
-python pareto.py input_file.csv [-v]
+python pareto.py input_file.csv [--header] [-v]
 ```
 
 ### Arguments:
 - `input_file.csv`: Path to the input CSV file containing the data points
+- `--header`: (Optional) Skip the first non-comment row as column names
 - `-v, --verbose`: (Optional) Enable verbose debug output
 
 ### Input File Format
 The input file should be a CSV file where:
 - Each line represents one solution
 - Values within each line are comma-separated
-- All values should be numeric
+- Values may be integers or decimal numbers and must be finite
 - Each column represents a dimension to be optimized
+- Every row must have the same number of columns
+- Blank lines and text following `#` are ignored
 
 ### Example: Prisoners' Dilemma
 
@@ -31,10 +34,10 @@ Consider the classic prisoners' dilemma where two suspects are being interrogate
 
 Input file `prisoners.csv`:
 ```
--1,-1    # Both remain silent
--5,0     # A silent, B betrays
-0,-5     # A betrays, B silent
--2,-2    # Both betray
+-1,-1 # Both remain silent
+-5,0  # A silent, B betrays
+0,-5  # A betrays, B silent
+-2,-2 # Both betray
 ```
 
 Running the command:
@@ -42,7 +45,13 @@ Running the command:
 python pareto.py prisoners.csv
 ```
 
-Will output the Pareto optimal solutions from this dataset. In this case, it will identify which outcomes are such that neither prisoner could improve their situation without making the other's worse.
+Outputs the Pareto-optimal rows as CSV:
+
+```text
+-1,-1
+-5,0
+0,-5
+```
 
 To see detailed comparison information during processing, use the verbose flag:
 ```bash
@@ -51,5 +60,14 @@ python pareto.py prisoners.csv -v
 
 ## Notes
 - The tool assumes higher values are better in all dimensions (in the prisoners' example, less negative numbers are "better" outcomes)
-- All values are treated as integers during comparison
-- Duplicate solutions are handled appropriately 
+- Values are parsed as exact decimals, avoiding binary floating-point rounding
+- Numerically equivalent duplicate solutions are returned once
+- Invalid files produce an explanation and a nonzero exit status
+
+## Development
+
+Run the test suite without additional dependencies:
+
+```bash
+python -m unittest -v
+```
